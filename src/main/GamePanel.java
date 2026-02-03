@@ -56,5 +56,9 @@ public class GamePanel extends JPanel implements Runnable {
         g2.setColor(Color.white);
         //DRAWS A RECTANGLE
         g2.fillRect(100, 100, tileSize, tileSize);
+
+        //program works without this but save memory
+        g2.dispose();
+
     }
 }
