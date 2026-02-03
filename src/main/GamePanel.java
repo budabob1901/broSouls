@@ -1,5 +1,7 @@
 package main;
 
+import entity.Player;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,7 +10,7 @@ public class GamePanel extends JPanel implements Runnable {
     final int originalTileSize = 16; //16X16 tile
     final int scale = 3;
 
-    final int tileSize = originalTileSize * scale; // 48x48
+    public final int tileSize = originalTileSize * scale; // 48x48
     final int maxScreenCol = 16;
     final int maxScreenRow = 12;
     final int screenWidth = tileSize * maxScreenCol; //768 pixels
@@ -19,6 +21,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     KeyHandler keyH = new KeyHandler();
     Thread gameThread;
+    Player player = new Player(this,keyH);
 
     // set player default position
 
@@ -76,19 +79,9 @@ public class GamePanel extends JPanel implements Runnable {
 
      // i jave starter kordnator 0x, 0y i vesnte øverste side af hjørnet.
     public void update() {
-       if(keyH.upPressed == true) {
-           playerY -= playerSpeed;
-       }
-       else if (keyH.downPressed == true){
-           playerY += playerSpeed;
 
-       } else if (keyH.leftPressed == true) {
-           playerX -= playerSpeed;
-           
-       } else if (keyH.rightPressed == true) {
-            playerX += playerSpeed;
-           
-       }
+        player.update();
+
     }
     //Graphic is a class methods to draw object on our screen
     public void paintComponent(Graphics g) {
@@ -97,9 +90,7 @@ public class GamePanel extends JPanel implements Runnable {
         // Graphic 2D extends the graphic class :)
         Graphics2D g2 = (Graphics2D)g;
 
-        g2.setColor(Color.white);
-        //DRAWS A RECTANGLE
-        g2.fillRect(playerX, playerY, tileSize, tileSize);
+        player.draw(g2);
 
         //program works without this but save memory
         g2.dispose();
