@@ -8,16 +8,14 @@ public class Main {
 
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
         window.setTitle("broSouls");
-
-        // BORDERLESS FULLSCREEN (med ramme)
-        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
 
-        window.setLocationRelativeTo(null);
+        // Gør vinduet fullscreen, men behold titelbar og kryds
+        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
         window.setVisible(true);
 
         gamePanel.startGameThread();
