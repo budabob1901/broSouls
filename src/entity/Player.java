@@ -69,29 +69,21 @@ public class Player extends Entity {
             x+= speed;
         }
     }
-    public void draw(Graphics2D g2){
-    //    g2.setColor(Color.white);
-        //DRAWS A RECTANGLE
-    //    g2.fillRect(x, y, gp.tileSize, gp.tileSize);
+    public void draw(Graphics2D g2) {
+
+        int screenX = x - gp.cameraX;
+        int screenY = y - gp.cameraY;
 
         BufferedImage image = null;
 
         switch (direction) {
-            case "up":
-                image = up1;
-                break;
-            case "down":
-                image = down1;
-                break;
-            case "left":
-                image = left1;
-                break;
-            case "right":
-                image = right1;
-                 break;
-
+            case "up": image = up1; break;
+            case "down": image = down1; break;
+            case "left": image = left1; break;
+            case "right": image = right1; break;
         }
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize,null);
+
+        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
     }
 
 }

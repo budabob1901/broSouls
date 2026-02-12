@@ -7,6 +7,8 @@ import java.awt.*;
 
 public class GamePanel extends JPanel implements Runnable {
     // Screen Setting
+    public int cameraX;
+    public int cameraY;
     final int originalTileSize = 16; //16X16 tile
     final int scale = 3;
 
@@ -15,6 +17,9 @@ public class GamePanel extends JPanel implements Runnable {
     final int maxScreenRow = 12;
     final int screenWidth = tileSize * maxScreenCol; //768 pixels
     final int screenHeight = tileSize * maxScreenRow;  // 576 pixels
+
+
+
 
     //FPS
     int FPS = 60;
@@ -82,6 +87,10 @@ public class GamePanel extends JPanel implements Runnable {
 
         player.update();
 
+        cameraX = player.x - screenWidth / 2 + this.tileSize / 2;
+        cameraY = player.y - screenHeight / 2 + this.tileSize /  2;
+
+
     }
     //Graphic is a class methods to draw object on our screen
     public void paintComponent(Graphics g) {
@@ -89,11 +98,17 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
         // Graphic 2D extends the graphic class :)
         Graphics2D g2 = (Graphics2D)g;
+        // 2 LINJER TIL AT SE HAN BEVÆGER SIG
+        g2.setColor(Color.gray);
+        g2.fillRect(0 - cameraX, 0 - cameraY, 200, 200);
+
 
         player.draw(g2);
 
         //program works without this but save memory
         g2.dispose();
 
+
     }
+
 }
