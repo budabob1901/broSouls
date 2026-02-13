@@ -71,6 +71,7 @@ public class Player extends Entity {
         if (y > bottomLimit) y = bottomLimit;
     }
 
+
     public void draw(Graphics2D g2) {
 
         int screenX = x - gp.cameraX;
@@ -86,5 +87,8 @@ public class Player extends Entity {
         }
 
         g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+    }
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, gp.tileSize, gp.tileSize);
     }
 }
