@@ -19,7 +19,7 @@ public class TitleScreen extends JPanel {
     private MenuState currentState = MenuState.MAIN_MENU;
 
     // Main menu options and selection
-    private String[] mainMenuOptions = {"CONTINUE", "LOAD GAME", "NEW GAME", "SYSTEM", "ONLINE"};
+    private final String[] mainMenuOptions = {"CONTINUE", "LOAD GAME", "NEW GAME", "SYSTEM", "ONLINE"};
     private int selectedOption = 0;
 
     // System menu options and selection

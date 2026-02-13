@@ -3,6 +3,7 @@ package entity;
 import main.GamePanel;
 import main.KeyHandler;
 
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -25,12 +26,10 @@ public class Player extends Entity {
 
     public void setDefaultValues() {
 
-        x = 100;
-        y = 300; // Start midt i den lille zone
-        speed = 12;
+        x = 100;       y = 100;
+        speed = 4;
         direction = "down";
     }
-
     public void getPlayerImage(){
         try{
 
@@ -49,38 +48,26 @@ public class Player extends Entity {
 
     }
 
-    public void update() {
-
-        if(keyH.upPressed) {
+    public void update(){
+        if(keyH.upPressed == true) {
             direction = "up";
             y -= speed;
+
         }
-        else if (keyH.downPressed){
+        else if (keyH.downPressed == true){
             direction = "down";
             y += speed;
-        }
-        else if (keyH.leftPressed) {
+
+
+        } else if (keyH.leftPressed == true) {
             direction = "left";
-            x -= speed;
-        }
-        else if (keyH.rightPressed) {
+            x-= speed;
+
+        } else if (keyH.rightPressed == true) {
             direction = "right";
-            x += speed;
+            x+= speed;
         }
-
-        // Verdens grænser i X
-        if (x < 0) x = 0;
-        if (x > gp.worldWidth - gp.tileSize)
-            x = gp.worldWidth - gp.tileSize;
-
-        // ⭐ MEGET mindre bevægelsesplads i Y
-        int topLimit = 200;     // hvor højt op han må gå
-        int bottomLimit = 600;  // hvor langt ned han må gå
-
-        if (y < topLimit) y = topLimit;
-        if (y > bottomLimit) y = bottomLimit;
     }
-
     public void draw(Graphics2D g2) {
 
         int screenX = x - gp.cameraX;
@@ -97,4 +84,5 @@ public class Player extends Entity {
 
         g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
     }
+
 }
