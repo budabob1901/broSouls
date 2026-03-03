@@ -2,28 +2,31 @@ package entity;
 
 import main.GamePanel;
 
+import java.awt.Rectangle;
+
 public class Enemy extends Entity {
 
     GamePanel gp;
 
-    // Patrol område
     int patrolMinX;
     int patrolMaxX;
     boolean movingRight = true;
 
-    // AI ranges
-    int chaseRange = 200;   // hvor tæt spilleren skal være før jagt
-    int attackRange = 30;   // collision kill
+    int chaseRange  = 20;
+    int damage      = 10;
+
+    // Size of enemy hitbox
+    private final int size = 40;
 
     public Enemy(GamePanel gp, int x, int y, int patrolMinX, int patrolMaxX) {
         this.gp = gp;
-        this.x = x;
-        this.y = y;
+        this.x  = x;
+        this.y  = y;
 
         this.patrolMinX = patrolMinX;
         this.patrolMaxX = patrolMaxX;
 
-        this.speed = 2;
+        this.speed     = 2;
         this.direction = "right";
     }
 
@@ -32,24 +35,22 @@ public class Enemy extends Entity {
         int playerX = gp.player.x;
         int playerY = gp.player.y;
 
-        // Distance til spilleren
         int dx = playerX - x;
         int dy = playerY - y;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        // 1. Jagt spilleren hvis han er tæt nok
         if (distance < chaseRange) {
             chasePlayer(playerX, playerY);
-        }
-        // 2. Ellers patruljer
-        else {
+        } else {
             patrol();
         }
 
-        // 3. Collision kill
-        if (distance < attackRange) {
-            gp.player.health = 0;
-            gp.player.isDead = true;
+        // Only deal damage when hitboxes actually overlap
+        Rectangle enemyBox  = new Rectangle(x, y, size, size);
+        Rectangle playerBox = gp.player.getBounds();
+
+        if (enemyBox.intersects(playerBox)) {
+            gp.player.takeHit(damage);
         }
     }
 
@@ -68,5 +69,9 @@ public class Enemy extends Entity {
             x -= speed;
             if (x < patrolMinX) movingRight = true;
         }
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, size, size);
     }
 }
