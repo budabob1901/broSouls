@@ -1,7 +1,6 @@
 package entity;
 
 import main.GamePanel;
-
 import java.awt.Rectangle;
 
 public class Enemy extends Entity {
@@ -12,11 +11,14 @@ public class Enemy extends Entity {
     int patrolMaxX;
     boolean movingRight = true;
 
-    int chaseRange  = 20;
-    int damage      = 10;
+    int chaseRange   = 300;
+    int stopDistance = 50;   // perfekt afstand til player hitbox
+    int damage       = 10;
 
-    // Size of enemy hitbox
-    private final int size = 40;
+    int attackCooldown = 0;
+    int attackDelay    = 75; // 1.25 sek cooldown
+
+    private final int size = 50; // centreret hitbox
 
     public Enemy(GamePanel gp, int x, int y, int patrolMinX, int patrolMaxX) {
         this.gp = gp;
@@ -26,8 +28,7 @@ public class Enemy extends Entity {
         this.patrolMinX = patrolMinX;
         this.patrolMaxX = patrolMaxX;
 
-        this.speed     = 2;
-        this.direction = "right";
+        this.speed = 2;
     }
 
     public void update() {
@@ -39,22 +40,33 @@ public class Enemy extends Entity {
         int dy = playerY - y;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
+        // Chase player
         if (distance < chaseRange) {
-            chasePlayer(playerX, playerY);
+            chasePlayer(playerX, playerY, distance);
         } else {
             patrol();
         }
 
-        // Only deal damage when hitboxes actually overlap
-        Rectangle enemyBox  = new Rectangle(x, y, size, size);
-        Rectangle playerBox = gp.player.getBounds();
+        // Cooldown
+        if (attackCooldown > 0) attackCooldown--;
 
-        if (enemyBox.intersects(playerBox)) {
-            gp.player.takeHit(damage);
+        // Collision damage
+        if (getBounds().intersects(gp.player.getBounds())) {
+            if (attackCooldown == 0) {
+
+                // SEND BEGGE KOORDINATER TIL PLAYER
+                gp.player.takeHit(damage, x, y);
+
+                attackCooldown = attackDelay;
+            }
         }
     }
 
-    private void chasePlayer(int playerX, int playerY) {
+    private void chasePlayer(int playerX, int playerY, double distance) {
+
+        // Stop tæt på spilleren
+        if (distance <= stopDistance) return;
+
         if (playerX > x) x += speed;
         if (playerX < x) x -= speed;
         if (playerY > y) y += speed;
@@ -72,6 +84,11 @@ public class Enemy extends Entity {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(x, y, size, size);
+        return new Rectangle(
+                x - size/2,
+                y - size/2,
+                size,
+                size
+        );
     }
 }

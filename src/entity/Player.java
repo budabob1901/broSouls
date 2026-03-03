@@ -37,7 +37,11 @@ public class Player extends Entity {
     private int attackTimer = 0;
     private int hitTimer    = 0;
 
-    // Each frame is 192x192, drawn at half size (96x96) so it fits nicely
+    // 2D Knockback
+    private int knockbackTimer = 0;
+    private double knockbackX = 0;
+    private double knockbackY = 0;
+
     private final int drawSize = 250;
 
     public Player(GamePanel gp, KeyHandler keyH) {
@@ -51,7 +55,6 @@ public class Player extends Entity {
         x         = 100;
         y         = 300;
         speed     = 4;
-        direction = "right";
         maxHealth = 100;
         health    = maxHealth;
         isDead    = false;
@@ -74,14 +77,11 @@ public class Player extends Entity {
             String jsonText = new String(jsonStream.readAllBytes(), StandardCharsets.UTF_8);
             JSONObject root = new JSONObject(jsonText);
 
-            // Build ordered list of all frames (frame 0, 1, 2 ... 45)
             JSONObject framesObj = root.getJSONObject("frames");
-            int totalFrames = framesObj.length(); // 46 frames (0-45)
+            int totalFrames = framesObj.length();
             BufferedImage[] allFrames = new BufferedImage[totalFrames];
 
             for (String key : framesObj.keySet()) {
-                // Key is "Skull Boy 0.aseprite", "Skull Boy 1.aseprite" etc.
-                // Extract the number from the key
                 String numStr = key.replace("Skull Boy ", "").replace(".aseprite", "").trim();
                 int index = Integer.parseInt(numStr);
 
@@ -94,13 +94,12 @@ public class Player extends Entity {
                 allFrames[index] = spriteSheet.getSubimage(fx, fy, fw, fh);
             }
 
-            // Read tags — from/to are 1-based in this JSON, so subtract 1
             JSONArray tags = root.getJSONObject("meta").getJSONArray("frameTags");
 
             for (int t = 0; t < tags.length(); t++) {
                 JSONObject tag  = tags.getJSONObject(t);
                 String     name = tag.getString("name").toLowerCase();
-                int        from = tag.getInt("from") - 1; // convert to 0-based
+                int        from = tag.getInt("from") - 1;
                 int        to   = tag.getInt("to")   - 1;
 
                 List<BufferedImage> target = switch (name) {
@@ -119,12 +118,6 @@ public class Player extends Entity {
                 }
             }
 
-            System.out.println("Loaded: idle=" + idleFrames.size()
-                    + " run="    + runFrames.size()
-                    + " attack=" + attackFrames.size()
-                    + " hit="    + hitFrames.size()
-                    + " death="  + deathFrames.size());
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,17 +131,22 @@ public class Player extends Entity {
             return;
         }
 
+        // 2D Knockback
+        if (knockbackTimer > 0) {
+            x += knockbackX;
+            y += knockbackY;
+            knockbackTimer--;
+        }
+
+        // HIT animation men stadig bevægelse
         if (isHit) {
             hitTimer--;
             if (hitTimer <= 0) {
                 isHit = false;
-            } else {
-                currentState = State.HIT;
-                tickAnim(hitFrames, true);
-                return;
             }
         }
 
+        // Attack animation
         if (attacking) {
             attackTimer--;
             if (attackTimer <= 0) {
@@ -160,7 +158,6 @@ public class Player extends Entity {
             }
         }
 
-        // Trigger attack on Space
         if (keyH.attackPressed && !attacking) {
             attacking    = true;
             attackTimer  = Math.max(1, attackFrames.size()) * animSpeed;
@@ -170,16 +167,12 @@ public class Player extends Entity {
             return;
         }
 
-        // Movement
         boolean moving = false;
 
         if (keyH.upPressed)    { y -= speed; moving = true; }
         if (keyH.downPressed)  { y += speed; moving = true; }
         if (keyH.leftPressed)  { x -= speed; facingRight = false; moving = true; }
         if (keyH.rightPressed) { x += speed; facingRight = true;  moving = true; }
-
-        if (y < 200) y = 200;
-        if (y > 600) y = 600;
 
         if (moving) {
             if (currentState != State.RUN) { animFrame = 0; animTimer = 0; }
@@ -219,8 +212,8 @@ public class Player extends Entity {
         int idx = Math.min(animFrame, currentAnim.size() - 1);
         BufferedImage frame = currentAnim.get(idx);
 
-        int screenX = x - gp.cameraX;
-        int screenY = y - gp.cameraY;
+        int screenX = x - gp.cameraX - drawSize/2;
+        int screenY = y - gp.cameraY - drawSize/2;
 
         if (!facingRight) {
             g2.drawImage(frame,
@@ -234,17 +227,32 @@ public class Player extends Entity {
     }
 
     public Rectangle getBounds() {
-        // Tight hitbox around the character
-        int hitW = 50;
-        int hitH = 60;
-        int hitX = x + (drawSize / 2) - (hitW / 2);
-        int hitY = y + 80; // character sits about 80px down in the 192px frame
-        return new Rectangle(hitX, hitY, hitW, hitH);
+
+        int hitW = 70;
+        int hitH = 90;
+
+        return new Rectangle(
+                x - hitW/2,
+                y - hitH/2,
+                hitW,
+                hitH
+        );
     }
 
-    public void takeHit(int damage) {
+    public void takeHit(int damage, int enemyX, int enemyY) {
         if (isDead || isHit) return;
+
         health -= damage;
+
+        // 2D Knockback beregning
+        double dx = x - enemyX;
+        double dy = this.y - enemyY;
+        double length = Math.sqrt(dx*dx + dy*dy);
+
+        knockbackX = (dx / length) * 20; // styrke
+        knockbackY = (dy / length) * 20;
+        knockbackTimer = 6;
+
         if (health <= 0) {
             health       = 0;
             isDead       = true;
