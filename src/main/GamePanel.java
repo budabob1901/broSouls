@@ -115,13 +115,23 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         // FJENDER
-        g2.setColor(Color.red);
         for (Enemy e : level.enemies) {
-            g2.fillRect(e.x - cameraX, e.y - cameraY, 40, 40);
+            e.draw(g2);
         }
 
         // PLAYER
         player.draw(g2);
+
+        // DEBUG HITBOXES — remove these once hitboxes feel right
+        g2.setColor(Color.yellow);
+        Rectangle pb = player.getBounds();
+        g2.drawRect(pb.x - cameraX, pb.y - cameraY, pb.width, pb.height);
+
+        g2.setColor(Color.orange);
+        for (Enemy e : level.enemies) {
+            Rectangle eb = e.getBounds();
+            g2.drawRect(eb.x - cameraX, eb.y - cameraY, eb.width, eb.height);
+        }
 
         g2.dispose();
     }
