@@ -39,7 +39,8 @@ public class Enemy extends Entity {
 
     private int animFrame  = 0;
     private int animTimer  = 0;
-    private int animSpeed  = 6; // ticks per frame
+    private int animSpeed  = 6
+            ; // ticks per frame
     private boolean facingRight = true;
 
     public Enemy(GamePanel gp, int x, int y, int patrolMinX, int patrolMaxX) {
